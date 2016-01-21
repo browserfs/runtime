@@ -18,8 +18,6 @@
 		"homepage": "http://www.browserfs.com/"
 	} ],
 
-	"version": "0.1",
-
     "require": {
     	"php": ">=5.4",
         "browserfs/string": "0.*"
@@ -29,5 +27,7 @@
     	"psr-4": {
     		"browserfs\\": "src/"
     	}
-    }
+    },
+
+    "minimum-stability": "dev"
 }
