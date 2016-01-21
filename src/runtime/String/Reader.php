@@ -23,6 +23,8 @@
 			'TOK_BLOCK_END' 		=> '/^\}/',
 			'TOK_SQBRACKET_BEGIN' 	=> '/^\[/',
 			'TOK_SQBRACKET_END' 	=> '/^\]/',
+			'TOK_RBRACKET_BEGIN'    => '/^\(/',
+			'TOK_RBRACKET_END'      => '/^\)/',
 			'TOK_QUESTION' 			=> '/^\?/',
 			'TOK_DOUBLEDOT' 		=> '/^\:/',
 			'TOK_SEMICOLON' 		=> '/^;/',
@@ -392,6 +394,46 @@
 
 		}
 
+		protected static function readEnumValues( \browserfs\string\Parser $reader ) {
+
+			self::readWhiteSpaceOrComment( $reader );
+
+			if ( !self::read( 'TOK_RBRACKET_BEGIN', $reader ) ) {
+				throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected "(", at line ' . $reader->line() );
+			}
+
+			$result = [];
+
+			do {
+				
+				$next = false;
+
+				self::readWhiteSpaceOrComment( $reader );
+
+				if ( $item = self::readString( 'TOK_VARIABLE_NAME', $reader ) ) {
+
+					$result[] = $item;
+
+					self::readWhiteSpaceOrComment( $reader );
+
+					if ( self::read('TOK_COMMA', $reader ) ) {
+						$next = true;
+					}
+
+				}
+
+			} while ( $next );
+
+			self::readWhiteSpaceOrComment( $reader );
+
+			if ( !self::read('TOK_RBRACKET_END', $reader ) ) {
+				throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected ")", at line ' . $reader->line() );
+			}
+
+			return $result;
+
+		}
+
 		protected static function getValidatorPropertyRules( \browserfs\string\Parser $reader, $endOfEnumerationToken = 'TOK_SEMICOLON' ) {
 			
 			$rules = [];
@@ -409,22 +451,35 @@
 				// optionally white space or comment
 				self::readWhiteSpaceOrComment( $reader );
 
-				if ( $operator != 'index' ) {
+				switch ( $operator ) {
+					case 'index':
+					
+						$value = null;
 
-					$value = self::readInlineValue( $reader );
+						if ( !self::read( 'TOK_SQBRACKET_BEGIN', $reader ) ) {
+							throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected "[", on line ' . $reader->line() );
+						}
 
-				} else {
+						// optional white space
+						self::readWhiteSpaceOrComment( $reader );
 
-					$value = null;
+						$value = self::getValidatorPropertyRules( $reader, 'TOK_SQBRACKET_END' );
+						break;
 
-					if ( !self::read( 'TOK_SQBRACKET_BEGIN', $reader ) ) {
-						throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected "[", on line ' . $reader->line() );
-					}
+					case 'instanceof':
 
-					// optional white space
-					self::readWhiteSpaceOrComment( $reader );
+						$value = self::readString( 'TOK_VARIABLE_NAME', $reader );
 
-					$value = self::getValidatorPropertyRules( $reader, 'TOK_SQBRACKET_END' );
+						break;
+
+					case 'oneof':
+
+						$value = self::readEnumValues( $reader );
+						break;
+
+					default:
+						$value = self::readInlineValue( $reader );
+						break;
 
 				}
 
@@ -500,9 +555,16 @@
 				
 				$rules = self::getValidatorPropertyRules( $reader );
 
-				foreach ( $rules as $rule ) {
-					$validator->addRootCondition( $rule['operator'], $rule['value'], $rule['error'] );
+				try {
+
+					foreach ( $rules as $rule ) {
+						$validator->addRootCondition( $rule['operator'], $rule['value'], $rule['error'] );
+					}
+
+				} catch ( \browserfs\runtime\Exception $e ) {
+					throw new \browserfs\runtime\Exception('Parser error, at line ' . $reader->line() . ': ' . $e->getMessage(), 1, $e );
 				}
+
 
 			} else {
 
@@ -524,8 +586,12 @@
 
 				$rules = self::getValidatorPropertyRules( $reader );
 
-				foreach ( $rules as $rule ) {
-					$validator->addPropertyCondition( $propertyName, $rule['operator'], $rule['value'], $rule['error'] );
+				try {
+					foreach ( $rules as $rule ) {
+						$validator->addPropertyCondition( $propertyName, $rule['operator'], $rule['value'], $rule['error'] );
+					}
+				} catch ( \browserfs\runtime\Exception $e ) {
+					throw new \browserfs\runtime\Exception('Parser error, at line ' . $reader->line() . ': ' . $e->getMessage(), 1, $e );
 				}
 
 			}

@@ -112,9 +112,22 @@
 					return is_string( $value ) && @preg_match( $value, '' ) !== false;
 					break;
 				case 'require':
-					return is_string( $value ) && preg_match( '/^[a-zA-Z_]([a-zA-Z0-9_]+)?$/', $value )
-						? true
-						: false;
+
+					if ( is_string( $value ) && preg_match( '/^[a-zA-Z_]([a-zA-Z0-9_]+)?$/', $value ) ) {
+						return true;
+					}
+
+					if ( is_array( $value ) ) {
+						foreach ( $value as $val ) {
+							if ( !is_string( $val ) || !preg_match( '/^[a-zA-Z_]([a-zA-Z0-9_]+)?$/', $val ) ) {
+								return false;
+							}
+						}
+
+						return true;
+					}
+
+					return false;
 					break;
 				case 'index':
 					if ( is_array( $value ) ) {
@@ -140,6 +153,18 @@
 				case 'instanceof':
 					if ( is_string( $value ) && strlen( $value ) && preg_match('/^[a-zA-Z_]([a-zA-Z0-9_]+)?$/', $value) ) {
 						return true;
+					} else {
+						return false;
+					}
+					break;
+				case 'oneof':
+					if ( is_array( $value ) ) {
+						foreach ( $value as $item ) {
+							if ( !is_string( $item ) || !preg_match('/^[a-zA-Z_]([a-zA-Z0-9_]+)?$/', $item ) ) {
+								return false;
+							}
+						}
+						return count( $value ) > 0;
 					} else {
 						return false;
 					}
@@ -410,19 +435,39 @@
 		 */
 		protected function opRequire( $mixed, $value ) {
 			
-			if ( $this->runtime->isValidatorRegistered( $value ) ) {
+			if ( is_string( $value ) ) {
 
-				$result = $this->runtime->isValidatableBy( $mixed, $value );
+				if ( $this->runtime->isValidatorRegistered( $value ) ) {
+
+					$result = $this->runtime->isValidatableBy( $mixed, $value );
+
+				} else {
+					throw new \browserfs\runtime\Exception('Validator ' . json_encode( $value ) . ' is not registered ( and is used by a @require operator in validator ' . json_encode( $this->name ) . ').' );
+				}
+
+				if ( $result === false ) {
+					$this->lastTestedValue = '(in validator ' . $value . ')';
+				}
+
+				return $result;
+
+			} else
+
+			if ( is_array( $value ) ) {
+
+				foreach ( $value as $subRequire ) {
+					if ( !$this->opRequire( $mixed, $subRequire ) ) {
+						return false;
+					}
+				}
+
+				return true;
 
 			} else {
-				throw new \browserfs\runtime\Exception('Validator ' . json_encode( $value ) . ' is not registered ( and is used by a @require operator in validator ' . json_encode( $this->name ) . ').' );
-			}
 
-			if ( $result === false ) {
-				$this->lastTestedValue = '(in validator ' . $value . ')';
-			}
+				return false;
 
-			return $result;
+			}
 		}
 
 		/**
@@ -589,6 +634,21 @@
 		}
 
 		/**
+		 * Operator "oneof" implementation
+		 */
+		protected function opOneOf( $mixed, $value ) {
+
+			foreach ( $value as $validatorName ) {
+				if ( $this->opRequire( $mixed, $validatorName ) ) {
+					return true;
+				}
+			}
+
+			return false;
+
+		}
+
+		/**
 		 * Operator wrapper
 		 */
 		protected function testOperator( $operator, $value, $mixed ) {
@@ -626,6 +686,9 @@
 					break;
 				case 'maxlength':
 					return $this->opMaxLength( $mixed, $value );
+					break;
+				case 'oneof':
+					return $this->opOneOf( $mixed, $value );
 					break;
 				default:
 					throw new \browserfs\runtime\Exception('Unknown operator ' . json_encode( $operator ) );
