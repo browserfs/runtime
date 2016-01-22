@@ -134,3 +134,8 @@ validator WebserviceResponse {
     }
 ?>
 ```
+
+In the above example, we tested if the $result variable is validatable by the
+validator called "WebserviceResponse". If any errors are encountered by the
+validator, in optional argument $errors, the testing system is storing all
+the errors occured.
