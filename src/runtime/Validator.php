@@ -169,6 +169,14 @@
 						return false;
 					}
 					break;
+				case 'in':
+				case 'nin':
+					if ( is_array( $value ) ) {
+						return count( $value ) > 0;
+					} else {
+						return false;
+					}
+					break;
 				default:
 					return false;
 					break;
@@ -649,6 +657,39 @@
 		}
 
 		/**
+		 * Operator "in" implementation
+		 */
+		protected function opIn( $mixed, $value ) {
+
+			foreach ( $value as $element ) {
+				if ( $mixed === $element ) {
+					return true;
+				}
+			}
+
+			$this->lastTestedValue = $mixed;
+
+			return false;
+
+		}
+
+		/**
+		 * Operator "nin" ( not in ) implementation
+		 */
+		protected function opNiN( $mixed, $value ) {
+
+			foreach ( $value as $element ) {
+				if ( $mixed === $element ) {
+					$this->lastTestedValue = $mixed;
+					return false;
+				}
+			}
+
+			return true;
+
+		}
+
+		/**
 		 * Operator wrapper
 		 */
 		protected function testOperator( $operator, $value, $mixed ) {
@@ -689,6 +730,12 @@
 					break;
 				case 'oneof':
 					return $this->opOneOf( $mixed, $value );
+					break;
+				case 'in':
+					return $this->opIn( $mixed, $value );
+					break;
+				case 'nin':
+					return $this->opNiN( $mixed, $value );
 					break;
 				default:
 					throw new \browserfs\runtime\Exception('Unknown operator ' . json_encode( $operator ) );

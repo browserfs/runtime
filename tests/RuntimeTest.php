@@ -2,12 +2,10 @@
 
 	class RuntimeTest extends PHPUnit_Framework_TestCase {
 
-		public function testItShouldParseTestFile() {
-
-			$runtime = \browserfs\Runtime::create([
-				__DIR__ . '/../std/builtin.types'
+		protected function setUp() {
+			$this->runtime = \browserfs\Runtime::create([
+				__DIR__ . '/../std/dummy.types'
 			]);
-
 		}
 
 		public function sampleTestProvider() {
@@ -29,7 +27,11 @@
 				[ true, 'http://www.google.com', 'URL' ],
 				[ false, null, 'URL' ],
 				[ false, [ 45 ], 'URL' ],
-				[ false, 'ABCDEFGH', 'CREDIT_CARD' ]
+				[ false, 'ABCDEFGH', 'CREDIT_CARD' ],
+				[ true, 1, 'ODD_NUMBER' ],
+				[ false,2, 'ODD_NUMBER' ],
+				[ true, 2, 'EVEN_NUMBER' ],
+				[ false, 1, 'EVEN_NUMBER' ]
 			];
 
 		}
@@ -39,11 +41,7 @@
 		 */
 		public function testIfAValueIsMatchingABuiltInValidator( $assertValue, $value, $validatorName ) {
 
-			$runtime = \browserfs\Runtime::create([
-				__DIR__ . '/../std/builtin.types'
-			]);
-
-			$this->assertEquals( $assertValue, $runtime->isValidatableBy( $value, $validatorName ) );
+			$this->assertEquals( $assertValue, $this->runtime->isValidatableBy( $value, $validatorName ) );
 
 		}
 

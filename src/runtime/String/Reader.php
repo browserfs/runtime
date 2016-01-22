@@ -40,10 +40,12 @@
 
 		protected $runtime = null;
 
-		public function __construct( $buffer, \browserfs\Runtime $runtime ) {
+		public function __construct( $buffer,  $fileName, \browserfs\Runtime &$runtime ) {
 			
 			parent::__construct( $buffer );
 			
+			$this->setFileName( $fileName );
+
 			$this->runtime = $runtime;
 			$this->parse();
 		}
@@ -176,7 +178,7 @@
 				$returnValue[ 'indexType' ] = self::readTypeProperty( $reader, $type, FALSE );
 
 				if ( $returnValue[ 'optional' ] ) {
-					throw new \browserfs\runtime\Exception('Indexes cannot be optional, at line ' . $reader->line() );
+					throw new \browserfs\runtime\Exception('Indexes cannot be optional, at line ' . $reader->line() . ' in file ' . $reader->file() );
 				}
 
 				$returnValue[ 'isIndex' ] = true;
@@ -184,7 +186,7 @@
 				self::readWhiteSpaceOrComment( $reader );
 
 				if ( !self::read( 'TOK_SQBRACKET_END', $reader ) ) {
-					throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected "]", at line ' . $reader->line() );
+					throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected "]", at line ' . $reader->line() . ' in file ' . $reader->file() );
 				}
 
 			} else {
@@ -193,7 +195,7 @@
 				$returnValue['name'] = self::readString( 'TOK_VARIABLE_NAME', $reader );
 
 				if ( $returnValue['name'] === false ) {
-					throw new \browserfs\runtime\Exception( 'Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected key name, at line ' . $reader->line() );
+					throw new \browserfs\runtime\Exception( 'Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected key name, at line ' . $reader->line() . ' in file ' . $reader->file() );
 				}
 
 				$returnValue['optional'] = self::read( 'TOK_QUESTION', $reader );
@@ -207,7 +209,7 @@
 			// read ':'
 
 			if ( !self::read( 'TOK_DOUBLEDOT', $reader ) ) {
-				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected ":", at line ' . $reader->line() );
+				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected ":", at line ' . $reader->line() . ' in file ' . $reader->file() );
 			}
 
 			// optionally white space
@@ -219,7 +221,7 @@
 				if ( self::read( 'TOK_SQBRACKET_BEGIN', $reader ) ) {
 
 					if ( !self::read( 'TOK_SQBRACKET_END', $reader ) ) {
-						throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected "]", at line ' . $reader->line() );
+						throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected "]", at line ' . $reader->line() . ' in file ' . $reader->file() );
 					}
 					
 					$returnValue['type'] .= '[]';
@@ -227,7 +229,7 @@
 
 			} else {
 
-				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected TYPE_DEF, at line ' . $reader->line() );
+				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected TYPE_DEF, at line ' . $reader->line() . ' in file ' . $reader->file() );
 
 			}
 
@@ -236,7 +238,7 @@
 
 			if ( $readSemiColon ) {
 				if ( !self::read( 'TOK_SEMICOLON', $reader ) ) {
-					throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected ";", at line ' . $reader->line() );
+					throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected ";", at line ' . $reader->line() . ' in file ' . $reader->file() );
 				}
 			}
 
@@ -249,13 +251,13 @@
 			// we allready parsed the "type" token.
 
 			if ( !self::readWhiteSpaceOrComment( $this ) ) {
-				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ' at line: ' . $this->line() );
+				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ' at line: ' . $this->line() . ' in file ' . $this->file() );
 			}
 
 			$typeName = self::readString( 'TOK_VARIABLE_NAME', $this );
 
 			if ( $typeName === false ) {
-				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ', expected type name, at line: ' . $this->line() );
+				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ', expected type name, at line: ' . $this->line() . ' in file ' . $this->file() );
 			}
 
 			$typeExtends = null;
@@ -269,7 +271,7 @@
 				$typeExtends = self::readString( 'TOK_VARIABLE_NAME', $this );
 
 				if ( $typeExtends === false ) {
-					throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ', expected extended type name, at line: ' . $this->line() );
+					throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ', expected extended type name, at line: ' . $this->line() . ' in file ' . $this->file() );
 				}
 
 			}
@@ -280,7 +282,7 @@
 			self::readWhiteSpaceOrComment( $this );
 
 			if ( !self::read( 'TOK_BLOCK_BEGIN', $this ) ) {
-				throw new \browserfs\runtime\Exception( 'Unexpected token ' . json_encode( $this->nextToken() ) . ', expected "{", at line: ' . $this->line() );
+				throw new \browserfs\runtime\Exception( 'Unexpected token ' . json_encode( $this->nextToken() ) . ', expected "{", at line: ' . $this->line() . ' in file ' . $this->file() );
 			}
 
 			do {
@@ -312,7 +314,7 @@
 			} while ( $property );
 
 			if ( !self::read( 'TOK_BLOCK_END', $this ) ) {
-				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ', expected "}", at line: ' . $this->line() . ', buffer: ' . json_encode( $this . '' ) );
+				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ', expected "}", at line: ' . $this->line() . ' in file ' . $this->file() . ', buffer: ' . json_encode( $this . '' ) );
 			}
 
 			return $returnValue;
@@ -394,12 +396,12 @@
 
 		}
 
-		protected static function readEnumValues( \browserfs\string\Parser $reader ) {
+		protected static function readEnumValues( \browserfs\string\Parser $reader, $readAnyInsteadOfVar = false ) {
 
 			self::readWhiteSpaceOrComment( $reader );
 
 			if ( !self::read( 'TOK_RBRACKET_BEGIN', $reader ) ) {
-				throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected "(", at line ' . $reader->line() );
+				throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected "(", at line ' . $reader->line() . ' in file ' . $reader->file() );
 			}
 
 			$result = [];
@@ -410,7 +412,13 @@
 
 				self::readWhiteSpaceOrComment( $reader );
 
-				if ( $item = self::readString( 'TOK_VARIABLE_NAME', $reader ) ) {
+				if ( $readAnyInsteadOfVar ) {
+					$item = self::readInlineValue( $reader );
+				} else {
+					$item = self::readString( 'TOK_VARIABLE_NAME', $reader );
+				}
+
+				if ( $item ) {
 
 					$result[] = $item;
 
@@ -427,7 +435,7 @@
 			self::readWhiteSpaceOrComment( $reader );
 
 			if ( !self::read('TOK_RBRACKET_END', $reader ) ) {
-				throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected ")", at line ' . $reader->line() );
+				throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected ")", at line ' . $reader->line() . ' in file ' . $reader->file() );
 			}
 
 			return $result;
@@ -443,7 +451,7 @@
 				$operator = self::readString( 'TOK_VALIDATOR_PROPERTY', $reader );
 
 				if ( $operator === false ) {
-					throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected validator operator, on line ' . $reader->line() );
+					throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected validator operator, on line ' . $reader->line() . ' in file ' . $reader->file() );
 				}
 
 				$operator = substr( $operator, 1 );
@@ -457,7 +465,7 @@
 						$value = null;
 
 						if ( !self::read( 'TOK_SQBRACKET_BEGIN', $reader ) ) {
-							throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected "[", on line ' . $reader->line() );
+							throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected "[", on line ' . $reader->line() . ' in file ' . $reader->file() );
 						}
 
 						// optional white space
@@ -492,9 +500,20 @@
 							$value = self::readString('TOK_VARIABLE_NAME', $reader );
 
 							if ( $value === null ) {
-								throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode($reader->nextToken()) . ', expected validator name or list of validators, on line ' . $reader->line() );
+								throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode($reader->nextToken()) . ', expected validator name or list of validators, on line ' . $reader->line() . ' in file ' . $reader->file() );
 							}
 
+						}
+
+						break;
+
+					case 'in':
+					case 'nin':
+
+						if ( $reader->canReadString( '(' ) ) {
+							$value = self::readEnumValues( $reader, true );
+						} else {
+							throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $reader->nextToken() ) . ', expected "(", on line ' . $reader->line() . ' in file ' . $reader->file() );
 						}
 
 						break;
@@ -506,7 +525,7 @@
 				}
 
 				if ( $value === null ) {
-					throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected <value>, at line ' . $reader->line() );
+					throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected <value>, at line ' . $reader->line() . ' in file ' . $reader->file() );
 				}
 
 				// optionally white space or comment
@@ -538,7 +557,7 @@
 					// is followed by end of instruction?
 
 					if ( self::read( $endOfEnumerationToken, $reader ) === false ) {
-						throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected <' . $endOfEnumerationToken . '> or ",", at line ' . $reader->line() );
+						throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected <' . $endOfEnumerationToken . '> or ",", at line ' . $reader->line() . ' in file ' . $reader->file() );
 					} else {
 						self::readWhiteSpaceOrComment( $reader );
 					}
@@ -546,7 +565,7 @@
 				}
 
 				if ( $reader->eof() ) {
-					throw new \browserfs\runtime\Exception('Unexpected end of buffer, @ line ' . $reader->line() );
+					throw new \browserfs\runtime\Exception('Unexpected end of buffer, @ line ' . $reader->line() . ' in file ' . $reader->file() );
 				}
 
 				$rules[] = [
@@ -584,7 +603,7 @@
 					}
 
 				} catch ( \browserfs\runtime\Exception $e ) {
-					throw new \browserfs\runtime\Exception('Parser error, at line ' . $reader->line() . ': ' . $e->getMessage(), 1, $e );
+					throw new \browserfs\runtime\Exception('Parser error, at line ' . $reader->line() . ' in file ' . $reader->file() . ': ' . $e->getMessage(), 1, $e );
 				}
 
 
@@ -594,14 +613,14 @@
 				$propertyName = self::readString( 'TOK_VARIABLE_NAME', $reader );
 
 				if ( $propertyName === false ) {
-					throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected <operator> or <property>, at line ' . $reader->line() );
+					throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected <operator> or <property>, at line ' . $reader->line() . ' in file ' . $reader->file() );
 				}
 
 				// read optionally white space or comment
 				self::readWhiteSpaceOrComment( $reader );
 
 				if ( !self::read('TOK_DOUBLEDOT', $reader ) ) {
-					throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected ":", at line ' . $reader->line() );
+					throw new \browserfs\runtime\Exception('Unexpected token ' . $reader->nextToken() . ', expected ":", at line ' . $reader->line() . ' in file ' . $reader->file() );
 				}
 
 				self::readWhiteSpaceOrComment( $reader );
@@ -613,7 +632,7 @@
 						$validator->addPropertyCondition( $propertyName, $rule['operator'], $rule['value'], $rule['error'] );
 					}
 				} catch ( \browserfs\runtime\Exception $e ) {
-					throw new \browserfs\runtime\Exception('Parser error, at line ' . $reader->line() . ': ' . $e->getMessage(), 1, $e );
+					throw new \browserfs\runtime\Exception('Parser error, at line ' . $reader->line() . ' in file ' . $reader->file() . ': ' . $e->getMessage(), 1, $e );
 				}
 
 			}
@@ -625,7 +644,7 @@
 		protected function parseValidator() {
 
 			if ( !self::readWhiteSpaceOrComment( $this ) ) {
-				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ' at line: ' . $this->line() );
+				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ' at line: ' . $this->line() . ' in file ' . $this->file() );
 			}
 
 			$validatorName = self::readString( 'TOK_VARIABLE_NAME', $this );
@@ -641,7 +660,7 @@
 				$validatorExtends = self::readString( 'TOK_VARIABLE_NAME', $this );
 
 				if ( $validatorExtends === false ) {
-					throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ', expected extended validator name, at line: ' . $this->line() );
+					throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ', expected extended validator name, at line: ' . $this->line() . ' in file ' . $this->file() );
 				}
 			}
 
@@ -651,7 +670,7 @@
 			self::readWhiteSpaceOrComment( $this );
 
 			if ( !self::read( 'TOK_BLOCK_BEGIN', $this ) ) {
-				throw new \browserfs\runtime\Exception( 'Unexpected token ' . json_encode( $this->nextToken() ) . ', expected "{", at line: ' . $this->line() );
+				throw new \browserfs\runtime\Exception( 'Unexpected token ' . json_encode( $this->nextToken() ) . ', expected "{", at line: ' . $this->line() . ' in file ' . $this->file() );
 			}
 
 			do {
@@ -667,7 +686,7 @@
 			} while ( $rule );
 
 			if ( !self::read( 'TOK_BLOCK_END', $this ) ) {
-				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ', expected "}", at line: ' . $this->line() . ', buffer: ' . json_encode( $this . '' ) );
+				throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode( $this->nextToken() ) . ', expected "}", at line: ' . $this->line() . ' in file ' . $this->file() . ', buffer: ' . json_encode( $this . '' ) );
 			}
 
 			return $returnValue;
@@ -692,7 +711,7 @@
 						break;
 
 					default:
-						throw new \browserfs\runtime\Exception("Unknown token " . json_encode( $this->nextToken() ) . ' at line: ' . $this->line() );
+						throw new \browserfs\runtime\Exception("Unknown token " . json_encode( $this->nextToken() ) . ' at line: ' . $this->line() . ' in file ' . $this->file() );
 						break;
 				}
 			}

@@ -244,7 +244,10 @@
 		}
 
 		/**
-		 * Imports types from a file
+		 * Imports types from a file in current runtime. Use this method
+		 * if you allready instantiated a runtime, and you want to load
+		 * later aditional definitions inside it.
+		 *
 		 */
 		public function load( $definitionFile ) {
 			
@@ -271,7 +274,7 @@
 
 			if ( is_string( $fileData ) ) {
 
-				$parser = new runtime\String\Reader( $fileData, $this );
+				$parser = new runtime\String\Reader( $fileData, $filePath, $this );
 
 				$this->files[ $filePath ] = true;
 
@@ -284,11 +287,20 @@
 		}
 
 		/**
-		 * Creates a new runtime from a list of ".ts" files.
+		 * Creates a new runtime from a list of ".types" files.
+		 *
+		 * @param $filesList   - a list of ".types" files to load
+		 * @param $loadStdDefs - load standard definitions ( default = true )
+		 * @return \browserfs\Runtime
+		 * @throws \browserfs\runtime\Exception
 		 */
-		public static function create( $filesList ) {
+		public static function create( $filesList, $loadStdDefs = true ) {
 			
 			$result = new self();
+
+			if ( $loadStdDefs ) {
+				$result->load( __DIR__ . '/../std/builtin.types' );
+			}
 
 			if ( is_array( $filesList ) ) {
 
@@ -296,6 +308,8 @@
 
 					if ( is_string( $fileName ) ) {
 						$result->load( $fileName );
+					} else {
+						throw new \browserfs\runtime\Exception('Failed to load definitions from ' . json_encode( $fileName ) );
 					}
 
 				}

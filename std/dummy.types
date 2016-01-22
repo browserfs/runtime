@@ -1,0 +1,10 @@
+validator ODD_NUMBER {
+	@in ( 1, 3, 5, 7, 9 ),
+	@instanceof int;
+}
+
+validator EVEN_NUMBER {
+	@nin ( 1, 3, 5, 7, 9 ),
+	@instanceof int;
+}
+
