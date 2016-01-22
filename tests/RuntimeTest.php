@@ -8,7 +8,7 @@
 			]);
 		}
 
-		public function sampleTestProvider() {
+		public function sampleValidatorProvider() {
 
 			return [
 				[ false, 1, 'NUMERIC' ],
@@ -31,17 +31,46 @@
 				[ true, 1, 'ODD_NUMBER' ],
 				[ false,2, 'ODD_NUMBER' ],
 				[ true, 2, 'EVEN_NUMBER' ],
-				[ false, 1, 'EVEN_NUMBER' ]
+				[ false, 1, 'EVEN_NUMBER' ],
+				[ false, [ 'value' => 1 ], 'VSINT' ],
+				[ false, 3, 'VSINT' ],
+				[ true,  '2', 'VSINT' ],
+				[ false, [ 'value' => 2 ], 'KVSINT' ],
+				[ true, json_decode( '{"value": "2"}' ), 'KVSINT' ],
+				[ true, [ "value" => "2" ], 'KVSINT' ],
+				[ false, [ "value" => "1" ], 'KVSINT' ]
 			];
 
 		}
 
 		/**
-		 * @dataProvider sampleTestProvider
+		 * @dataProvider sampleValidatorProvider
 		 */
 		public function testIfAValueIsMatchingABuiltInValidator( $assertValue, $value, $validatorName ) {
 
-			$this->assertEquals( $assertValue, $this->runtime->isValidatableBy( $value, $validatorName ) );
+			$this->assertEquals( $assertValue, $result = $this->runtime->isValidatableBy( $value, $validatorName, $errors ) );
+
+		}
+
+		public function sampleTypeProvider() {
+			return [
+				[ true, '2', 'sint' ],
+				[ false, 2 , 'sint' ],
+				[ true, '2.2', 'sfloat' ],
+				[ false, '2',  'sfloat' ],
+				[ true,  '2.2', 'snumber' ],
+				[ true,  '2',   'snumber' ],
+				[ true,  '-2',  'snumber' ],
+				[ true,  '-2.43', 'snumber' ]
+			];
+		}
+
+		/**
+		 * @dataProvider sampleTypeProvider
+		 */
+		public function testSIntSFloatAndSNumberTypes( $assertValue, $value, $typeName ) {
+
+			$this->assertEquals( $assertValue, $this->runtime->isTypeOf( $value, $typeName ) );
 
 		}
 

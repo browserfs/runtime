@@ -23,9 +23,11 @@
 		public static function getKeys( $mixed ) {
 			return is_array( $mixed )
 				? array_keys( $mixed )
-				: ( is_object( $mixed )
-					? array_keys( get_object_vars( $mixed ) )
-					: [] );
+				: ( 
+					is_object( $mixed )
+						? array_keys( get_object_vars( $mixed ) )
+						: [] 
+				);
 		}
 
 		/**
@@ -36,9 +38,11 @@
 		public static function getProperty( $mixed, $propertyName ) {
 			return is_array( $mixed )
 				? $mixed[ $propertyName ]
-				: ( is_object( $mixed )
-					? $mixed->{$propertyName}
-					: null );
+				: ( 
+					is_object( $mixed )
+						? $mixed->{$propertyName}
+						: null 
+				);
 		}
 
 		/**
@@ -48,10 +52,12 @@
 		 */
 		public static function hasProperty( $mixed, $propertyName ) {
 			return is_array( $mixed )
-				? isset( $mixed[ $propertyName ] )
-				: is_object( $mixed )
-					? isset( $mixed->{$propertyName} )
-					: false;
+				? array_key_exists( $propertyName, $mixed )
+				: ( 
+					is_object( $mixed )
+						? isset( $mixed->{$propertyName} )
+						: false 
+				);
 		}
 
 	}

@@ -62,7 +62,7 @@
 			foreach ( $props as $needsImplementation ) {
 				if ( !\browserfs\runtime\Utils::hasProperty( $mixed, $needsImplementation ) ) {
 					if ( $includeErrors ) {
-						$errors[] = 'object does not implement a property called ' . json_encode( $needsImplementation );
+						$errors[] = 'object ' . json_encode( $mixed ) . ' does not implement a property called ' . json_encode( $needsImplementation );
 					}
 					return false;
 				}

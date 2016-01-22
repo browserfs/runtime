@@ -8,3 +8,16 @@ validator EVEN_NUMBER {
 	@instanceof int;
 }
 
+type DUMMY_SINT {
+	value: sint;
+}
+
+validator VSINT {
+	@instanceof sint;
+}
+
+validator KVSINT {
+	@instanceof DUMMY_SINT;
+
+	value: @min 2;
+}
