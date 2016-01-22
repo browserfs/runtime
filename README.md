@@ -94,10 +94,10 @@ validator WebserviceV8MetaValidator extends WebserviceValidator {
 
 validator WebserviceResponse {
   // the response should match the data type "WebserviceResponse"
-  @instanceof 'WebserviceResponse';
+  @instanceof WebserviceResponse;
   
   // the stable version is right now 8, so we're using the v8 validator
-  meta: @require 'WebserviceV8MetaValidator';
+  meta: @require WebserviceV8MetaValidato';
   
   // force the minimum data length to be 32
   data: @minlength 32;
@@ -110,7 +110,6 @@ validator WebserviceResponse {
     ...
     
     // load our types and validators into a object called "runtime".
-    // 
     $runtime = \browserfs\Runtime::create([
       __DIR__ . '/defs/Webservices.defs',
       ..., // other definition file
@@ -141,3 +140,44 @@ In the above example, we tested if the $result variable is validatable by the
 validator called "WebserviceResponse". If any errors are encountered by the
 validator, in optional argument $errors, the testing system is storing all
 the errors occured.
+
+**Example 2** could be wrote as follows:
+
+**defs/SampleRequest.type**
+```
+
+// first we're ensuring that the data has a structure
+type SamplePostRequestType {
+  age: sint;      // age is a string representing an integer value
+  name: string;   // name is a string
+}
+
+// and after than we're ensuring that the value respects a pattern
+validator SamplePostRequest {
+  
+  @instanceof SamplePostRequestType;
+
+  age: @min 20 => 'We expected for you to be at least 20 years old, but you are {$value} years',
+       @max 100 => 'We believe that you are too old in order to fill in this form ( you stated that you have {$value} years )';
+
+  name: @match '/^[a-z\\s]{2,30}$/i' => 'Please provide a name containing only letters and spaces, of minimum 2 and maximum 3 characters';
+
+}
+
+```
+
+**SampleClass.php**
+```php
+<?php
+  ...
+
+  // load our types and validators into a object called "runtime".
+  $runtime = \browserfs\Runtime::create([
+    __DIR__ . '/defs/SampleRequest.type'
+  ]);
+
+  if ( $runtime->isValidatableBy( $_POST, 'SamplePostRequest', $errors ) ) {
+
+  }
+
+```
