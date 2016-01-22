@@ -43,4 +43,4 @@ function autoload_init( $class_prefix, $base_dir ) {
 
 autoload_init( 'browserfs\\', __DIR__ . '/src/' );
 
-throw new \Exception( json_encode( scandir( __DIR__ . '/..' ), JSON_PRETTY_PRINT ) );
+throw new \Exception( json_encode( scandir( __DIR__  ), JSON_PRETTY_PRINT ) );
