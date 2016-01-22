@@ -198,15 +198,15 @@ After that, the flow is easy, you can test:
 
 This library defines the following primitives built in types:
 
-- int - native php int type
-- float - native php float type
-- number - any value that is either native php int, either php float
-- sint - any decimal string that can be parsed as an integer
-- sfloat - any decimal string that can be parsed as a float 
-- snumber - any decimal string that can be parsed either as an integer, either as a float
-- string - native php string type
-- boolean - native php boolean type
-- any - any type of data
+- **int** - native php int type
+- **float** - native php float type
+- **number** - any value that is either native php int, either php float
+- **sint** - any decimal string that can be parsed as an integer
+- **sfloat** - any decimal string that can be parsed as a float 
+- **snumber** - any decimal string that can be parsed either as an integer, either as a float
+- **string** - native php string type
+- **boolean** - native php boolean type
+- **any** - any type of data
 
 ## User defined types
 
@@ -222,7 +222,7 @@ type <TypeName> [ extends <OtherTypeName> ] {
 }
 ```
 
-<TypeName>, <OtherTypeName>, <key_name_1>, <key_name_2>, <index_key> must be valid identifier names.
+TypeName, OtherTypeName, key_name_1, key_name_2, index_key must be valid identifier names.
 
 Examples:
 
@@ -286,8 +286,9 @@ validator <ValidatorName> [ extends <OtherValidator> ] {
 
 ## Operators of a validator:
 
-**@min** -> used to test if a value is >= than the <argument>
-**@max** -> used to test if a value is <= than the <argument>
+**@min** -> used to test if a value is >= than the **argument**
+
+**@max** -> used to test if a value is <= than the **argument**
 
 ```
 validator MinAndMaxOperatorExample {
@@ -296,9 +297,11 @@ validator MinAndMaxOperatorExample {
 }
 ```
 
-**@minlength** -> used to test if the length of a value is >= than the <argument>
-**@maxlength** -> used to test if the length of a value is <= than the <argument>
-**@length** -> used to test if the length of a value is = with the argument
+**@minlength** -> used to test if the length of a value is >= than the **argument**
+
+**@maxlength** -> used to test if the length of a value is <= than the **argument**
+
+**@length** -> used to test if the length of a value is = with the **argument**
 
 ```
 validator MinLengthMaxLengthAndLengthExample {
@@ -309,8 +312,9 @@ validator MinLengthMaxLengthAndLengthExample {
 }
 ```
 
-**@is** -> used to test if a value is === with the argument
-**@isnot** -> used to test if a value is !== with the argument
+**@is** -> used to test if a value is === with the **argument**
+
+**@isnot** -> used to test if a value is !== with the **argument**
 
 ```
 validator IsAndIsNotExample {
@@ -321,8 +325,9 @@ validator IsAndIsNotExample {
 }
 ```
 
-**@in** -> used to test if a value is member of a set of values ( in this case the argument is a set of values )
-**@nin** -> used to test if a value is not member of a set of values ( in this case the argument is a set of values )
+**@in** -> used to test if a value is member of a set of values ( in this case the **argument** is a set of values )
+
+**@nin** -> used to test if a value is not member of a set of values ( in this case the **argument** is a set of values )
 
 ```
 validator InAndNotInExample {
@@ -339,7 +344,7 @@ validator MatchValidatorExample {
 }
 ```
 
-**@require** -> used to require other validators at current position ( needs to be explained better )
+**@require** -> used to require other validators at current position
 
 ```
 validator RequireChild {
@@ -351,12 +356,10 @@ validator OtherRequireChild {
   bar: @match '/^boo/';
 }
 
-validator RequireCompositionExample {
+validator CompositeValidatorPatternExample {
   // All the rules from RequireChild and OtherRequireChild validator are imported
   // in the root of this validator
   @require ( RequireChild, OtherRequireChild );
-
-  otherProperty: @in( 3, 4 );
 }
 ```
 
