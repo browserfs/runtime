@@ -385,18 +385,14 @@
 		protected function opMin( $mixed, $value ) {
 			
 			if ( is_int( $mixed ) || is_float( $mixed ) ) {
-				echo "isint || isfloat\n";
 				$result = $mixed >= $value;
 			} else
 			if ( is_string( $mixed ) && is_string( $value ) ) {
-				echo "is_string && is_string";
 				$result = strcmp( $mixed, $value ) >= 0;
 			} else
 			if ( is_string( $mixed ) && ( is_int( $value ) || is_float( $value ) ) ) {
-				echo "is_string && (is_int || is_float)";
 				$result = (float)$mixed >= $value;
 			} else {
-				echo "false\n";
 				$result = false;
 			}
 

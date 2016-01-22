@@ -8,7 +8,7 @@
 			]);
 		}
 
-		public function sampleTestProvider() {
+		public function sampleValidatorProvider() {
 
 			return [
 				[ false, 1, 'NUMERIC' ],
@@ -37,13 +37,14 @@
 				[ true,  '2', 'VSINT' ],
 				[ false, [ 'value' => 2 ], 'KVSINT' ],
 				[ true, json_decode( '{"value": "2"}' ), 'KVSINT' ],
-				[ true, [ "value" => "2" ], 'KVSINT' ]
+				[ true, [ "value" => "2" ], 'KVSINT' ],
+				[ false, [ "value" => "1" ], 'KVSINT' ]
 			];
 
 		}
 
 		/**
-		 * @dataProvider sampleTestProvider
+		 * @dataProvider sampleValidatorProvider
 		 */
 		public function testIfAValueIsMatchingABuiltInValidator( $assertValue, $value, $validatorName ) {
 
@@ -51,9 +52,26 @@
 
 		}
 
-		public function testIfSuppostitionsAreTrue() {
-			$this->assertEquals( true, is_string( "2" ) );
-			$this->assertEquals( true, preg_match( '/^(0|(\\-)?[1-9]([0-9]+)?)$/', "2" ) ? true : false );
+		public function sampleTypeProvider() {
+			return [
+				[ true, '2', 'sint' ],
+				[ false, 2 , 'sint' ],
+				[ true, '2.2', 'sfloat' ],
+				[ false, '2',  'sfloat' ],
+				[ true,  '2.2', 'snumber' ],
+				[ true,  '2',   'snumber' ],
+				[ true,  '-2',  'snumber' ],
+				[ true,  '-2.43', 'snumber' ]
+			];
+		}
+
+		/**
+		 * @dataProvider sampleTypeProvider
+		 */
+		public function testSIntSFloatAndSNumberTypes( $assertValue, $value, $typeName ) {
+
+			$this->assertEquals( $assertValue, $this->runtime->isTypeOf( $value, $typeName ) );
+
 		}
 
 	}

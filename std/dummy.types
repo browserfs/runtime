@@ -18,4 +18,6 @@ validator VSINT {
 
 validator KVSINT {
 	@instanceof DUMMY_SINT;
+
+	value: @min 2;
 }
