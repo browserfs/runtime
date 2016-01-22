@@ -453,7 +453,7 @@
 
 				switch ( $operator ) {
 					case 'index':
-					
+
 						$value = null;
 
 						if ( !self::read( 'TOK_SQBRACKET_BEGIN', $reader ) ) {
@@ -464,6 +464,7 @@
 						self::readWhiteSpaceOrComment( $reader );
 
 						$value = self::getValidatorPropertyRules( $reader, 'TOK_SQBRACKET_END' );
+
 						break;
 
 					case 'instanceof':
@@ -475,6 +476,27 @@
 					case 'oneof':
 
 						$value = self::readEnumValues( $reader );
+						break;
+
+					case 'require':
+
+						// if we can read a "(", means we're intending to use multiple requirements.
+						// otherwise we're reading a single require
+
+						if ( $reader->canReadString('(') ) {
+							
+							$value = self::readEnumValues( $reader );
+
+						} else {
+							
+							$value = self::readString('TOK_VARIABLE_NAME', $reader );
+
+							if ( $value === null ) {
+								throw new \browserfs\runtime\Exception('Unexpected token ' . json_encode($reader->nextToken()) . ', expected validator name or list of validators, on line ' . $reader->line() );
+							}
+
+						}
+
 						break;
 
 					default:
