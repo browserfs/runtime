@@ -4,7 +4,7 @@
 
 	class Number extends \browserfs\runtime\Type {
 		
-		public function test( $mixed ) {
+		public function test( $mixed, &$errors = null ) {
 			return is_int( $mixed ) || is_float( $mixed );
 		}
 		
