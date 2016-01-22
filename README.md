@@ -181,3 +181,236 @@ validator SamplePostRequest {
   }
 
 ```
+
+# Data types and validators
+
+There are built-in data types, and user defined data types. User defined data types
+are wrote in a definition file ( extension ".types" ). The library creates a
+environment ( called **runtime** ), where it store the data types and the validators
+parsed from the ".types" files you wrote.
+
+After that, the flow is easy, you can test:
+
+- if a value of any type respects a data type you previously defined ( or a built-in type )
+- if a value of any type can be validated with the help of a validator you previously defined
+
+## Built-in types
+
+This library defines the following primitives built in types:
+
+- **int** - native php int type
+- **float** - native php float type
+- **number** - any value that is either native php int, either php float
+- **sint** - any decimal string that can be parsed as an integer
+- **sfloat** - any decimal string that can be parsed as a float 
+- **snumber** - any decimal string that can be parsed either as an integer, either as a float
+- **string** - native php string type
+- **boolean** - native php boolean type
+- **any** - any type of data
+
+## User defined types
+
+Having the built-in types, we can create user-defined types ( complex types ) in a .types file,
+by respecting the following syntax:
+
+```
+type <TypeName> [ extends <OtherTypeName> ] {
+  <key_name_1>: <key_type_1>,
+  <key_name_2>: <key_type_2>,
+  ...
+  [ <index_key>: <index_key_type> ]: <key_type_value>
+}
+```
+
+TypeName, OtherTypeName, key_name_1, key_name_2, index_key must be valid identifier names.
+
+Examples:
+
+```
+type Person {
+  id: number;
+  name: string;
+}
+
+type Student extends Person {
+  grades: number[]; // Grades is an array containing only elements of type number
+}
+
+type StudentCollection {
+  [ index: number ]: Student;
+}
+
+type StudentHashCollection {
+  [ index: string ]: Student;
+}
+```
+
+## Validators
+
+After we defined our data types, we need a mechanism to validate the values
+we store in them. For this case, we implemented Validators.
+
+The syntax of a validator is as follows:
+
+```
+validator <ValidatorName> [ extends <OtherValidator> ] {
+
+  // Root operators ( are aplied on the value itself )
+  [ 
+      <@operator_1> <argument> [ => '<Error>' ],
+      <@operator_2> <argument> [ => '<Error>' ],
+      ...
+      <operator_n> <value> [ => '<Error>' ]
+      ; // End of root object operators
+  ]
+
+  // Properties operators ( are aplied on the properties of the value )
+  <key_name_1>: <@operator_1> <argument> [ => '<Error>' ],
+                <@operator_2> <argument> [ => '<Error>' ],
+                ...
+                <@operator_n> <argument> [ => '<Error>' ];
+
+  <key_name_2>: <@operator_1> <argument> [ => '<Error>' ],
+                <@operator_2> <argument> [ => '<Error>' ],
+                ...
+                <@operator_n> <argument> [ => '<Error>' ];
+  ...
+
+  <key_name_n>: <@operator_1> <argument> [ => '<Error>' ],
+                <@operator_2> <argument> [ => '<Error>' ],
+                ...
+                <@operator_n> <argument> [ => '<Error>' ];
+
+}
+```
+
+## Operators of a validator:
+
+**@min** -> used to test if a value is >= than the **argument**
+
+**@max** -> used to test if a value is <= than the **argument**
+
+```
+validator MinAndMaxOperatorExample {
+   foo: @min 2 => 'The foo value of this object must be greater than 2!';
+   bar: @max 10 => 'The "bar" value of this object must be max 10';
+}
+```
+
+**@minlength** -> used to test if the length of a value is >= than the **argument**
+
+**@maxlength** -> used to test if the length of a value is <= than the **argument**
+
+**@length** -> used to test if the length of a value is = with the **argument**
+
+```
+validator MinLengthMaxLengthAndLengthExample {
+  name:    @minLength 2  => 'The name of the person must be at least 2 characters length';
+  grades:  @minLength 4  => 'You must specify at least 4 grades';
+  address: @maxLength 20 => 'The address can contain maximum 20 characters!';
+  md5hash: @length 32    => 'The encrypted password must have exactly 32 characters!';
+}
+```
+
+**@is** -> used to test if a value is === with the **argument**
+
+**@isnot** -> used to test if a value is !== with the **argument**
+
+```
+validator IsAndIsNotExample {
+  password: @isnot 'test' => 'Error: Password too weak';
+  foo: @is true;
+  bar: @is 3;
+  version: @isnot 10 => 'Version #10 is not supported!';
+}
+```
+
+**@in** -> used to test if a value is member of a set of values ( in this case the **argument** is a set of values )
+
+**@nin** -> used to test if a value is not member of a set of values ( in this case the **argument** is a set of values )
+
+```
+validator InAndNotInExample {
+  password: @nin( 'test', 'test123', 'admin', 'password' ) => 'Error: Password is too common!';
+  cityId: @in( 23, 14, 15 ) => 'Error: Invalid city id!';
+}
+```
+
+**@match** -> used to test if a value matches against a regular expression
+
+```
+validator MatchValidatorExample {
+  name: @match "/^[a-z]+$/"i => 'Error: Your name must contain only letters!';
+}
+```
+
+**@require** -> used to require other validators at current position
+
+```
+validator RequireChild {
+  foo: @minlength 3,
+       @maxlength 10;
+}
+
+validator OtherRequireChild {
+  bar: @match '/^boo/';
+}
+
+validator CompositeValidatorPatternExample {
+  // All the rules from RequireChild and OtherRequireChild validator are imported
+  // in the root of this validator
+  @require ( RequireChild, OtherRequireChild );
+}
+```
+
+**@instanceof** -> used to test if current object or property is of type of the argument of the operator
+
+```
+type Person {
+  age: number;
+  name: string;
+}
+
+validator PersonValidator {
+  
+  // validates only objects which are of type person
+  @instanceof Person;
+
+}
+
+validator PropertyInstanceValidator {
+  
+  // the foo property of this validator must be of type "number"
+  foo: @instanceof number,
+       @min: 2;
+}
+
+```
+
+**@index** -> used to specify aditional operators on a validator
+
+```
+/// to document
+
+```
+
+**@oneof** -> used to create variant validators
+
+```
+validator CARD_VISA {
+  @type string,
+  @match "/^4[0-9]{15}$/";
+}
+
+validator CARD_MASTERCARD {
+  @type string,
+  @match "/^52[0-9]{12}$";
+}
+
+validator CREDIT_CARD {
+  @oneof (
+    CARD_VISA,
+    CARD_MASTERCARD
+  );
+}
+```
