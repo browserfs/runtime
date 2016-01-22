@@ -383,12 +383,20 @@
 		 * Operator "min" implementation
 		 */
 		protected function opMin( $mixed, $value ) {
+			
 			if ( is_int( $mixed ) || is_float( $mixed ) ) {
+				echo "isint || isfloat\n";
 				$result = $mixed >= $value;
 			} else
-			if ( is_string( $mixed ) ) {
+			if ( is_string( $mixed ) && is_string( $value ) ) {
+				echo "is_string && is_string";
 				$result = strcmp( $mixed, $value ) >= 0;
+			} else
+			if ( is_string( $mixed ) && ( is_int( $value ) || is_float( $value ) ) ) {
+				echo "is_string && (is_int || is_float)";
+				$result = (float)$mixed >= $value;
 			} else {
+				echo "false\n";
 				$result = false;
 			}
 
@@ -406,8 +414,11 @@
 			if ( is_int( $mixed ) || is_float( $mixed ) ) {
 				$result = $mixed <= $value;
 			} else
-			if ( is_string( $mixed ) ) {
+			if ( is_string( $mixed ) && is_string( $value ) ) {
 				$result = strcmp( $mixed, $value ) <= 0;
+			} else 
+			if ( is_string( $mixed ) && ( is_int( $value ) || is_float( $value ) ) ){
+				$result = (float)$mixed >= $value;
 			} else {
 				$result = false;
 			}
@@ -555,6 +566,8 @@
 			} else {
 				$result = $this->runtime->isTypeOf( $mixed, $value, $errors );
 			}
+
+			// echo json_encode( $mixed ) . ', is: ', json_encode( $value ), ' ? ', json_encode( $result ), "\n";
 
 			if ( $result === false ) {
 				$this->lastTestedValue = $value;

@@ -31,7 +31,13 @@
 				[ true, 1, 'ODD_NUMBER' ],
 				[ false,2, 'ODD_NUMBER' ],
 				[ true, 2, 'EVEN_NUMBER' ],
-				[ false, 1, 'EVEN_NUMBER' ]
+				[ false, 1, 'EVEN_NUMBER' ],
+				[ false, [ 'value' => 1 ], 'VSINT' ],
+				[ false, 3, 'VSINT' ],
+				[ true,  '2', 'VSINT' ],
+				[ false, [ 'value' => 2 ], 'KVSINT' ],
+				[ true, json_decode( '{"value": "2"}' ), 'KVSINT' ],
+				[ true, [ "value" => "2" ], 'KVSINT' ]
 			];
 
 		}
@@ -41,8 +47,13 @@
 		 */
 		public function testIfAValueIsMatchingABuiltInValidator( $assertValue, $value, $validatorName ) {
 
-			$this->assertEquals( $assertValue, $this->runtime->isValidatableBy( $value, $validatorName ) );
+			$this->assertEquals( $assertValue, $result = $this->runtime->isValidatableBy( $value, $validatorName, $errors ) );
 
+		}
+
+		public function testIfSuppostitionsAreTrue() {
+			$this->assertEquals( true, is_string( "2" ) );
+			$this->assertEquals( true, preg_match( '/^(0|(\\-)?[1-9]([0-9]+)?)$/', "2" ) ? true : false );
 		}
 
 	}
