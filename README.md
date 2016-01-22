@@ -1,6 +1,8 @@
 # Runtime Types
 A PHP library used to test at runtime if a value matches a pattern ( or a type ).
 
+[![Build Status](https://travis-ci.org/browserfs/runtime.svg?branch=master)](https://travis-ci.org/browserfs/runtime)
+
 ## Why?
 How many times, and how many lines of code you had to write in order 
 to check the type of data and the values in data provided from webservices,
