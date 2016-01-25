@@ -48,7 +48,11 @@ autoload_init( 'browserfs\\', __DIR__ . '/src/' );
 if ( is_dir( __DIR__ . '/vendor') && file_exists( __DIR__ . '/vendor/autoload.php') ) {
 	require_once __DIR__ . '/vendor/autoload.php';
 } else {
-	if ( is_dir( __DIR__ . '/../string' ) ) {
-		autoload_init( 'browserfs\\string', __DIR__ . '/../string/src');
+	if ( is_dir( __DIR__ . '/../base' ) && file_exists( __DIR__ . '/../base/bootstrap.php' ) ) {
+		require_once __DIR__ . '/../base/bootstrap.php';
+	}
+
+	if ( is_dir( __DIR__ . '/../string' ) && file_exists( __DIR__ . '/../string/bootstrap.php' ) ) {
+		require_once __DIR__ . '/../string/bootstrap.php';
 	}
 }
