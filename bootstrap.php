@@ -53,6 +53,6 @@ if ( is_dir( __DIR__ . '/vendor') && file_exists( __DIR__ . '/vendor/autoload.ph
 	}
 
 	if ( is_dir( __DIR__ . '/../string' ) && file_exists( __DIR__ . '/../string/bootstrap.php' ) ) {
-		require_once __DIR__ . '/../string/bootstrap.php'
+		require_once __DIR__ . '/../string/bootstrap.php';
 	}
 }
