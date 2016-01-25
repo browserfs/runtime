@@ -20,7 +20,8 @@
 
     "require": {
     	"php": ">=5.4",
-        "browserfs/string": "0.*"
+    	"browserfs/base": "0.*",
+        "browserfs/string": ">=1.0.4"
     },
 
     "autoload": {
