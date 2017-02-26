@@ -2,12 +2,14 @@
 
 	namespace browserfs\runtime\Type;
 
-	class Int extends \browserfs\runtime\Type {
+	use browserfs\runtime\Type;
+
+	class Varchar extends Type {
 		
 		public function test( $mixed, &$errors = null ) {
-			return is_int( $mixed );
+			return is_string( $mixed );
 		}
-
+		
 	}
 
 ?>

@@ -1,6 +1,5 @@
 <?php
-
+	
 	namespace browserfs\runtime;
 
-	class Exception extends \browserfs\Exception {
-	}
+	class Exception extends \Exception {}

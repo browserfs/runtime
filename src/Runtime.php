@@ -17,17 +17,17 @@
 
 			// register native types
 			$this->types = [ 
-				'int'     => new runtime\Type\Int($this, 'int'),
+				'int'     => new runtime\Type\Integer($this, 'int'),
 				'sint'    => new runtime\Type\SInt( $this, 'sint' ),
 
-				'float'   => new runtime\Type\Float($this, 'float'),
+				'float'   => new runtime\Type\Decimal($this, 'float'),
 				'sfloat'  => new runtime\Type\SFloat( $this, 'sfloat' ),
 
 				'number'  => new runtime\Type\Number($this, 'number'),
 				'snumber' => new runtime\Type\SNumber($this, 'snumber' ),
 
 				'boolean' => new runtime\Type\Boolean($this, 'boolean'),
-				'string'  => new runtime\Type\String($this, 'string'),
+				'string'  => new runtime\Type\Varchar($this, 'string'),
 				'any'     => new runtime\Type\Any($this, 'any')
 			];
 
